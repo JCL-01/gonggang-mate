@@ -83,7 +83,7 @@ git switch -c feat/S07-board
 3. 템플릿 칸을 채우고(화면 ID, 스크린샷) **Create pull request**
 
 ### ⑦ 리뷰 → 합치기
-- 다른 팀원 1명이 확인(Approve)하면 관리자가 **Merge** 한다
+- **관리자가** PR을 확인하고 **Merge** 한다
 - 수정 요청이 오면: 같은 브랜치에서 고치고 커밋 → 동기화하면 PR에 자동 반영
 - 합쳐진 뒤에는 다시 ①번부터
 
@@ -91,7 +91,7 @@ git switch -c feat/S07-board
 
 ## 규칙
 
-1. **master에 직접 올리지 않는다.** 항상 PR로.
+1. **master에 직접 올리지 않는다.** 항상 내 Fork에서 PR로. (관리자만 master에 직접 올릴 수 있다)
 2. **PR은 작게.** 화면 하나 또는 기능 하나.
 3. **공통 파일**(`src/constants`, `src/types`, `src/components`)을 고칠 때는 단톡방에 먼저 알리고, 화면 작업과 **따로** PR을 올린다.
 4. 색상·숫자는 직접 적지 말고 `theme.ts`, `config.ts`에서 가져다 쓴다.
