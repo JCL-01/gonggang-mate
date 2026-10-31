@@ -1,4 +1,4 @@
-/**timegrid
+/**
  * 공통 컴포넌트: TimeGrid (요일×시간 격자) — PRD "공통 컴포넌트: TimeGrid"
  *
  * S06 공강 설정(mode="multi")과 S08 게시물 약속시간 설정(mode="single-range")이 함께 쓴다.
