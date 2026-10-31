@@ -58,7 +58,7 @@ src/
 | S11~S13 채팅                      | `(tabs)/chats` `chat/[roomId]` `popups/MateInfoPopup`  |      |
 | S14~S15 약속                      | `popups/ConfirmAppointmentPopup` `(tabs)/appointments` |      |
 | S16 게임                          | `game/[roomId]`                                        |      |
-| S17 후기·신고/차단                | `review/[appointmentId]`                               |      |
+| S17 후기·차단                    | `review/[appointmentId]`                               |      |
 
 ## 검사 명령어
 

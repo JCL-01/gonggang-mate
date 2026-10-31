@@ -12,7 +12,7 @@ export const colors = {
   bg: '#F6F7FB', // 화면 배경
   white: '#FFFFFF',
   alert: '#C2410C', // 알림 배지, 하트
-  danger: '#C92A2A', // 신고/차단
+  danger: '#C92A2A', // 차단
 } as const;
 
 /** 카테고리 키 (DB 값과 같음) */
