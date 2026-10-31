@@ -66,7 +66,6 @@ export interface ChatRoom {
   id: string;
   post_id: string;
   host_id: string; // 방장
-  is_recruiting: boolean; // false면 방장이 모집 마감 (10/31 회의)
   created_at: Timestamp;
 }
 
