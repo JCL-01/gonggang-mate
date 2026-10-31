@@ -35,6 +35,8 @@ src/
     chat/[roomId].tsx        S12 채팅방
     game/[roomId].tsx        S16 게임
     review/[appointmentId].tsx  S17 후기작성
+  api/                       화면이 부르는 서버 함수 (지금은 가짜 데이터) → src/api/README.md
+  lib/                       시간 계산, 게시물 노출 규칙 같은 순수 함수
   components/                여러 화면이 같이 쓰는 부품
     Button.tsx, Avatar.tsx
     TimeGrid.tsx             요일×시간 격자 (S06, S08 공용)

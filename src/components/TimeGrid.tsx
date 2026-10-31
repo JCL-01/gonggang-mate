@@ -13,14 +13,10 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { colors, spacing } from "@/constants/theme";
-import type { TimeString, Weekday } from "@/types/db";
+import type { TimeRange } from "@/types/db";
 
-/** 출력 값: 연속된 칸을 하나의 구간으로 합친 결과 */
-export type TimeRange = {
-  weekday: Weekday;
-  start: TimeString; // 'HH:mm'
-  end: TimeString; // 'HH:mm'
-};
+/** 출력 값: 연속된 칸을 하나의 구간으로 합친 결과 (타입 정의는 types/db.ts) */
+export type { TimeRange };
 
 export type TimeGridProps = {
   mode: "multi" | "single-range";

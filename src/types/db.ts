@@ -16,6 +16,13 @@ export type TimeString = string;
 /** ISO 날짜시간 문자열 (예: '2026-11-02T03:00:00Z') */
 export type Timestamp = string;
 
+/** 요일 + 시간 구간 (공강 구간, 게시물 약속시간). TimeGrid 입출력 값 */
+export type TimeRange = {
+  weekday: Weekday;
+  start: TimeString; // 'HH:mm'
+  end: TimeString; // 'HH:mm'
+};
+
 export interface User {
   id: string;
   school_id: string;
