@@ -1,56 +1,70 @@
-# Welcome to your Expo app 👋
+# 공강메이트
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+같은 대학 학생끼리 **공강 시간이 겹치는 사람**을 찾아 식사·카페·공부·산책을 함께하도록 연결하는 모바일 앱.
 
-## Get started
+- 기준 문서: **PRD** (발표 자료와 다르면 PRD를 따른다)
+- 기술: React Native (Expo) + TypeScript, Expo Router
+- 협업 방법: [CONTRIBUTING.md](./CONTRIBUTING.md) ← **처음이면 꼭 읽기**
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## 실행하기
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+휴대폰의 **Expo Go** 앱으로 터미널의 QR 코드를 찍으면 앱이 열린다. (컴퓨터와 같은 와이파이)
 
-### Other setup steps
+## 폴더 구조
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```
+src/
+  app/                       화면 (파일 하나 = 화면 하나)
+    index.tsx                S01 타이틀
+    login.tsx                S02 로그인
+    signup.tsx               S03 회원가입
+    settings.tsx             S04 설정(프로필)
+    (tabs)/                  하단 네비가 있는 화면
+      solo.tsx               S09 혼자
+      home.tsx               S05 메인
+      chats.tsx              S11 채팅 목록
+      appointments.tsx       S15 약속카드
+    free-time.tsx            S06 공강 설정
+    board/[category].tsx     S07 카테고리 게시판 (식사/카페/공부/산책 공용)
+    post/new.tsx             S08 게시물 작성
+    chat/[roomId].tsx        S12 채팅방
+    game/[roomId].tsx        S16 게임
+    review/[appointmentId].tsx  S17 후기작성
+  components/                여러 화면이 같이 쓰는 부품
+    Button.tsx, Avatar.tsx
+    TimeGrid.tsx             요일×시간 격자 (S06, S08 공용)
+    popups/                  S10 핀포인트, S13 메이트 정보, S14 약속 확정 팝업
+    ScreenPlaceholder.tsx    임시 화면 틀 (화면 완성 후 사용 안 함)
+  constants/
+    theme.ts                 색상·글자 크기 (PRD 4장)
+    config.ts                설정값 (30분 단위, 채팅방 6명 등)
+  types/
+    db.ts                    데이터 모델 타입 (PRD 9장)
+```
 
-## Learn more
+## 화면 담당
 
-To learn more about developing your project with Expo, look at the following resources:
+| 화면 | 파일 | 담당 |
+|---|---|---|
+| S01~S04 인증·프로필 | `index` `login` `signup` `settings` | |
+| S05 메인, S06 공강 설정, TimeGrid | `(tabs)/home` `free-time` `components/TimeGrid` | |
+| S07~S08 게시판 | `board/[category]` `post/new` | |
+| S09~S10 혼자 지도 | `(tabs)/solo` `popups/PlacePopup` | |
+| S11~S13 채팅 | `(tabs)/chats` `chat/[roomId]` `popups/MateInfoPopup` | |
+| S14~S15 약속 | `popups/ConfirmAppointmentPopup` `(tabs)/appointments` | |
+| S16 게임 | `game/[roomId]` | |
+| S17 후기·신고/차단 | `review/[appointmentId]` | |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 검사 명령어
 
-## Join the community
+```bash
+npm run lint        # 코드 규칙 검사
+npm run typecheck   # 타입 검사
+```
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+PR을 올리면 GitHub가 위 두 가지를 자동으로 검사한다.

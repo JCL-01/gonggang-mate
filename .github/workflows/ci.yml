@@ -1,0 +1,22 @@
+# PR을 올리면 자동으로 검사한다. 빨간 X가 뜨면 고치고 다시 push.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: 코드 규칙 검사 (lint)
+        run: npm run lint
+      - name: 타입 검사 (typecheck)
+        run: npm run typecheck
