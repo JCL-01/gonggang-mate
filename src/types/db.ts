@@ -69,6 +69,16 @@ export interface ChatRoom {
   created_at: Timestamp;
 }
 
+/** 채팅방 입장 요청. 방장이 수락해야 입장된다 (10/31 회의) */
+export interface JoinRequest {
+  id: string;
+  room_id: string;
+  user_id: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: Timestamp;
+  decided_at: Timestamp | null;
+}
+
 export interface ChatMember {
   room_id: string;
   user_id: string;
@@ -137,20 +147,6 @@ export interface Block {
   created_at: Timestamp;
 }
 
-export type ReportReason = 'no_show' | 'abuse' | 'fake_profile' | 'other';
-
-export interface Report {
-  id: string;
-  reporter_id: string;
-  target_id: string;
-  appointment_id: string | null;
-  reason: ReportReason;
-  detail: string | null; // other일 때 최대 200자
-  status: 'pending' | 'confirmed' | 'rejected';
-  created_at: Timestamp;
-  resolved_at: Timestamp | null;
-}
-
 /** 게임 5종 (PRD S16) */
 export type GameType = 'ladder' | 'draw' | 'order' | 'wheel' | 'teams';
 
@@ -187,6 +183,8 @@ export interface Place {
 
 export type NotificationType =
   | 'new_message'
+  | 'join_request' // 방장에게: 입장 요청이 왔어요
+  | 'join_accepted' // 요청한 사람에게: 입장이 수락됐어요
   | 'new_member'
   | 'appointment_confirmed'
   | 'appointment_soon'
