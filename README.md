@@ -1,4 +1,4 @@
-# 공강메이트 ㅇㅇ
+# 공강메이트
 
 같은 대학 학생끼리 **공강 시간이 겹치는 사람**을 찾아 식사·카페·공부·산책을 함께하도록 연결하는 모바일 앱.
 
@@ -49,16 +49,16 @@ src/
 
 ## 화면 담당
 
-| 화면 | 파일 | 담당 |
-|---|---|---|
-| S01~S04 인증·프로필 | `index` `login` `signup` `settings` | |
-| S05 메인, S06 공강 설정, TimeGrid | `(tabs)/home` `free-time` `components/TimeGrid` | |
-| S07~S08 게시판 | `board/[category]` `post/new` | |
-| S09~S10 혼자 지도 | `(tabs)/solo` `popups/PlacePopup` | |
-| S11~S13 채팅 | `(tabs)/chats` `chat/[roomId]` `popups/MateInfoPopup` | |
-| S14~S15 약속 | `popups/ConfirmAppointmentPopup` `(tabs)/appointments` | |
-| S16 게임 | `game/[roomId]` | |
-| S17 후기·신고/차단 | `review/[appointmentId]` | |
+| 화면                              | 파일                                                   | 담당 |
+| --------------------------------- | ------------------------------------------------------ | ---- |
+| S01~S04 인증·프로필               | `index` `login` `signup` `settings`                    |      |
+| S05 메인, S06 공강 설정, TimeGrid | `(tabs)/home` `free-time` `components/TimeGrid`        |      |
+| S07~S08 게시판                    | `board/[category]` `post/new`                          |      |
+| S09~S10 혼자 지도                 | `(tabs)/solo` `popups/PlacePopup`                      |      |
+| S11~S13 채팅                      | `(tabs)/chats` `chat/[roomId]` `popups/MateInfoPopup`  |      |
+| S14~S15 약속                      | `popups/ConfirmAppointmentPopup` `(tabs)/appointments` |      |
+| S16 게임                          | `game/[roomId]`                                        |      |
+| S17 후기·신고/차단                | `review/[appointmentId]`                               |      |
 
 ## 검사 명령어
 
@@ -68,3 +68,7 @@ npm run typecheck   # 타입 검사
 ```
 
 PR을 올리면 GitHub가 위 두 가지를 자동으로 검사한다.
+
+개발팀 팀원
+
+1. 이주찬

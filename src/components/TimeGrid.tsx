@@ -10,10 +10,10 @@
  * - single-range: 한 요일의 연속 구간 하나만
  * - highlight: 내 공강 칸을 옅은 색으로 미리 표시
  */
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from "react-native";
 
-import { colors, spacing } from '@/constants/theme';
-import type { TimeString, Weekday } from '@/types/db';
+import { colors, spacing } from "@/constants/theme";
+import type { TimeString, Weekday } from "@/types/db";
 
 /** 출력 값: 연속된 칸을 하나의 구간으로 합친 결과 */
 export type TimeRange = {
@@ -23,7 +23,7 @@ export type TimeRange = {
 };
 
 export type TimeGridProps = {
-  mode: 'multi' | 'single-range';
+  mode: "multi" | "single-range";
   value: TimeRange[];
   onChange: (next: TimeRange[]) => void;
   /** 옅게 미리 보여 줄 구간 (S08에서 내 공강 표시용) */
@@ -44,10 +44,10 @@ const styles = StyleSheet.create({
   box: {
     padding: spacing.lg,
     borderWidth: 1,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     borderColor: colors.primary,
     borderRadius: 12,
     backgroundColor: colors.primaryTint,
   },
-  text: { color: colors.primary, textAlign: 'center' },
+  text: { color: colors.primary, textAlign: "center" },
 });
