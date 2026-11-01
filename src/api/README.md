@@ -46,6 +46,12 @@ try {
 - `lib/time.ts`: 칸 ↔ 구간 변환, 다음 약속 날짜 계산(KST), `'월 12:00-13:00'` 같은 표시 문구
 - `lib/visibility.ts`: 게시물 노출 규칙 `isPostVisibleTo` (30분 이상 겹침, 10/31 회의). 서버도 같은 규칙으로 거른다.
 
+## 가짜 데이터 ↔ 실제 서버 전환
+
+`.env`의 `EXPO_PUBLIC_USE_MOCK_API`로 고른다. 값이 없거나 `true`면 가짜 데이터, `false`면 Supabase로 바꾼 함수가 실제 서버를 쓴다.
+지금 Supabase로 바뀐 파일: `auth`, `users`(`getMateInfo` 제외). 나머지는 아직 가짜 데이터.
+가짜 코드는 `mock/`에 그대로 있다.
+
 ## C(DB 담당)가 할 일
 
 1. Supabase 설치: `npx expo install @supabase/supabase-js` 후 `src/lib/supabase.ts`에 클라이언트 만들기 (`.env`의 URL·키 사용)
