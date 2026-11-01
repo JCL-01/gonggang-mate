@@ -63,6 +63,8 @@ export async function sendMessage(roomId: string, body: string): Promise<Message
  * S12: 새 메시지 실시간 구독. 화면에서 이렇게 쓴다.
  *   useEffect(() => subscribeMessages(roomId, (m) => setMessages((prev) => [...prev, m])), [roomId]);
  * 내가 보낸 메시지도 이 구독으로 들어온다 (중복 추가하지 않게 id로 확인).
+ * 구독 직후 1초쯤은 서버 연결 준비 중이라 그 사이 메시지를 놓칠 수 있다.
+ * 그래서 구독을 먼저 시작하고 getMessages로 목록을 불러와 id로 합친다.
  */
 export function subscribeMessages(roomId: string, onMessage: (message: MessageItem) => void): () => void {
   if (USE_MOCK_API) return mock.subscribeMessages(roomId, onMessage);
