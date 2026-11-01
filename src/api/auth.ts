@@ -55,8 +55,6 @@ export async function signUp(email: string, password: string): Promise<Me> {
     bio: null,
     photo_url: null,
     heart_count: 0,
-    status: 'active' as const,
-    suspended_until: null,
     created_at: nowIso(),
   };
   db.users.push(user);

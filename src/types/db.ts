@@ -32,8 +32,6 @@ export interface User {
   bio: string | null; // 최대 40자
   photo_url: string | null;
   heart_count: number;
-  status: 'active' | 'suspended' | 'banned';
-  suspended_until: Timestamp | null;
   created_at: Timestamp;
 }
 
@@ -80,8 +78,8 @@ export interface ChatRoom {
 export interface JoinRequest {
   id: string;
   room_id: string;
-  user_id: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  requester_id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'canceled';
   created_at: Timestamp;
   decided_at: Timestamp | null;
 }

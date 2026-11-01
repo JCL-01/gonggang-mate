@@ -80,10 +80,10 @@ export async function deletePost(postId: string): Promise<void> {
 function toListItem(p: Post, meId: string): PostListItem {
   const room = db.rooms.find((r) => r.post_id === p.id)!;
   const req = db.joinRequests
-    .filter((j) => j.room_id === room.id && j.user_id === meId)
+    .filter((j) => j.room_id === room.id && j.requester_id === meId)
     .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
   const isMember = roomMemberIds(room.id).includes(meId);
-  const my_request: MyRequestStatus = isMember ? 'accepted' : (req?.status ?? 'none');
+  const my_request: MyRequestStatus = isMember ? 'accepted' : !req || req.status === 'canceled' ? 'none' : req.status;
   return {
     id: p.id,
     room_id: room.id,
