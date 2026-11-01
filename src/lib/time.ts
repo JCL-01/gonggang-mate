@@ -107,3 +107,16 @@ export function formatTimeLeft(startAt: Timestamp, now: Date = new Date()): stri
   if (min < 24 * 60) return `${Math.floor(min / 60)}시간 전`;
   return `${Math.floor(min / (24 * 60))}일 전`;
 }
+
+/** 구간들의 총 길이(분) */
+export function totalMinutes(ranges: TimeRange[]): number {
+  return ranges.reduce((sum, r) => sum + timeToMinutes(r.end) - timeToMinutes(r.start), 0);
+}
+
+/** 270 → '4시간 30분', 60 → '1시간', 30 → '30분' */
+export function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h && m) return `${h}시간 ${m}분`;
+  return h ? `${h}시간` : `${m}분`;
+}

@@ -9,6 +9,7 @@ export const colors = {
   ink: '#1B1F2A', // 본문 텍스트
   sub: '#5B6170', // 보조 텍스트
   line: '#E4E7EE', // 구분선
+  lineSoft: '#F0F2F6', // 옅은 구분선 (TimeGrid 30분 선)
   bg: '#F6F7FB', // 화면 배경
   white: '#FFFFFF',
   alert: '#C2410C', // 알림 배지, 하트
