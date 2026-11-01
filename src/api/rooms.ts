@@ -22,9 +22,9 @@ export async function requestJoin(postId: string): Promise<MyRequestStatus> {
   const room = db.rooms.find((r) => r.post_id === postId)!;
   if (roomMemberIds(room.id).includes(meId)) return 'accepted';
   if (roomMemberIds(room.id).length >= MAX_ROOM_MEMBERS) throw new ApiError('인원이 가득 찼어요', 'room_full');
-  const existing = db.joinRequests.find((j) => j.room_id === room.id && j.user_id === meId && j.status === 'pending');
+  const existing = db.joinRequests.find((j) => j.room_id === room.id && j.requester_id === meId && j.status === 'pending');
   if (existing) return 'pending';
-  db.joinRequests.push({ id: newId('jr'), room_id: room.id, user_id: meId, status: 'pending', created_at: nowIso(), decided_at: null });
+  db.joinRequests.push({ id: newId('jr'), room_id: room.id, requester_id: meId, status: 'pending', created_at: nowIso(), decided_at: null });
   return 'pending';
 }
 
@@ -33,7 +33,7 @@ export async function cancelJoinRequest(postId: string): Promise<void> {
   await delay();
   const meId = requireMeId();
   const room = db.rooms.find((r) => r.post_id === postId);
-  db.joinRequests = db.joinRequests.filter((j) => !(j.room_id === room?.id && j.user_id === meId && j.status === 'pending'));
+  db.joinRequests = db.joinRequests.filter((j) => !(j.room_id === room?.id && j.requester_id === meId && j.status === 'pending'));
 }
 
 /** S12 (방장만): 대기 중인 채팅 요청 목록 */
@@ -45,7 +45,7 @@ export async function getJoinRequests(roomId: string): Promise<JoinRequestItem[]
   return copy(
     db.joinRequests
       .filter((j) => j.room_id === roomId && j.status === 'pending')
-      .map((j) => ({ id: j.id, user: toMini(j.user_id), created_at: j.created_at })),
+      .map((j) => ({ id: j.id, user: toMini(j.requester_id), created_at: j.created_at })),
   );
 }
 
@@ -61,8 +61,8 @@ export async function respondJoinRequest(requestId: string, accept: boolean): Pr
   req.status = accept ? 'accepted' : 'rejected';
   req.decided_at = nowIso();
   if (accept) {
-    db.members.push({ room_id: room.id, user_id: req.user_id, joined_at: nowIso(), last_read_message_id: null });
-    addSystemMessage(room.id, `${findUser(req.user_id).nickname}님이 채팅방에 들어왔어요`);
+    db.members.push({ room_id: room.id, user_id: req.requester_id, joined_at: nowIso(), last_read_message_id: null });
+    addSystemMessage(room.id, `${findUser(req.requester_id).nickname}님이 채팅방에 들어왔어요`);
   }
 }
 

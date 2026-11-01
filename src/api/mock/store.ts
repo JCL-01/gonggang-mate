@@ -58,8 +58,6 @@ function user(id: string, nickname: string, gender: 'male' | 'female', bio: stri
     bio,
     photo_url: null,
     heart_count: heart,
-    status: 'active',
-    suspended_until: null,
     created_at: createdAt,
   };
 }
@@ -141,9 +139,9 @@ function seed() {
 
   const joinRequests: JoinRequest[] = [
     // 내 방(r-5)에 산책러가 채팅 요청을 보낸 상태 → 방장인 내가 수락/거절
-    { id: 'jr-1', room_id: 'r-5', user_id: 'u-3', status: 'pending', created_at: createdAt, decided_at: null },
+    { id: 'jr-1', room_id: 'r-5', requester_id: 'u-3', status: 'pending', created_at: createdAt, decided_at: null },
     // 내가 카페 글(r-2)에 요청을 보낸 상태
-    { id: 'jr-2', room_id: 'r-2', user_id: ME_ID, status: 'pending', created_at: createdAt, decided_at: null },
+    { id: 'jr-2', room_id: 'r-2', requester_id: ME_ID, status: 'pending', created_at: createdAt, decided_at: null },
   ];
 
   const messages: Message[] = [
