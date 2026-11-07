@@ -4,12 +4,19 @@
  * users 테이블 행은 S04에서 처음 저장할 때 생긴다. 그 전에는 getMe가 nickname ''인 빈 프로필을 돌려준다.
  * 이메일은 DB 권한상 아무도 읽을 수 없어서, 내 이메일은 로그인 세션에서 가져온다.
  *
- * TODO(C): 프로필 사진은 Storage에 업로드 (지금은 http 주소만 저장)
+ * 프로필 사진(11/6 결정 1번): Storage 버킷 avatars의 {내 id}/{시각}.jpg. uploadProfilePhoto로 올리고 공개 주소를 받아
+ * updateMe의 photo_url로 저장한다. 저장하면 내 폴더의 다른(예전) 사진 파일은 지운다.
+ * 회원 탈퇴(11/6 결정 7번): Edge Function delete-account (서버가 방장 넘기기·메시지 탈퇴 표시·사진 삭제·계정 삭제)
  */
+import { FunctionsHttpError } from '@supabase/supabase-js';
+
 import * as mock from '@/api/mock/users';
 import { requireAuthUser, sb, toApiError, USE_MOCK_API } from '@/api/supabaseHelpers';
 import { ApiError, type MateInfo, type Me, type ProfileInput } from '@/api/types';
 import { BIO_MAX_LENGTH, NICKNAME_MAX_LENGTH, NICKNAME_MIN_LENGTH } from '@/constants/config';
+import { readFileBytes } from '@/lib/readFileBytes';
+
+const AVATAR_BUCKET = 'avatars';
 
 const PROFILE_COLUMNS = 'id, school_id, nickname, gender, bio, photo_url, heart_count, created_at';
 
@@ -53,7 +60,68 @@ export async function updateMe(input: ProfileInput): Promise<Me> {
     if (error.code === '23505') throw new ApiError('이미 사용 중인 닉네임이에요', 'already_exists');
     throw toApiError(error, '프로필을 저장하지 못했어요');
   }
+  await removeOldPhotos(user.id, profile.photo_url);
   return getMe();
+}
+
+/** 내 폴더에서 지금 프로필 사진이 아닌 파일을 지운다. 실패해도 프로필 저장은 성공으로 둔다 (탈퇴 때 폴더째 지워짐) */
+async function removeOldPhotos(userId: string, currentUrl: string | null) {
+  try {
+    const { data: files } = await sb().storage.from(AVATAR_BUCKET).list(userId, { limit: 100 });
+    const old = (files ?? []).map((f) => `${userId}/${f.name}`).filter((path) => !currentUrl?.endsWith(`/${path}`));
+    if (old.length > 0) await sb().storage.from(AVATAR_BUCKET).remove(old);
+  } catch (e) {
+    if (__DEV__) console.warn('[removeOldPhotos]', e);
+  }
+}
+
+/**
+ * S04: 프로필 사진 올리기. lib/profilePhoto의 pickProfilePhoto로 고른 로컬 JPEG를 받아 공개 주소를 돌려준다.
+ * 아직 프로필에 저장하지 않는다 → updateMe({ photo_url })로 저장
+ */
+export async function uploadProfilePhoto(localUri: string): Promise<string> {
+  if (USE_MOCK_API) return mock.uploadProfilePhoto(localUri);
+  const user = await requireAuthUser();
+  const path = `${user.id}/${Date.now()}.jpg`;
+  let bytes: ArrayBuffer;
+  try {
+    bytes = await readFileBytes(localUri);
+  } catch {
+    throw new ApiError('사진을 읽지 못했어요. 다른 사진을 골라 주세요', 'invalid_input');
+  }
+  const { error } = await sb().storage.from(AVATAR_BUCKET).upload(path, bytes, { contentType: 'image/jpeg', upsert: false });
+  if (error) {
+    if (/size|too large|exceed/i.test(error.message)) throw new ApiError('사진이 너무 커요. 다른 사진을 골라 주세요', 'invalid_input');
+    throw toApiError(error, '사진을 올리지 못했어요');
+  }
+  return sb().storage.from(AVATAR_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/** S03 가입: 이용약관·개인정보처리방침 동의 시각 저장 (프로필 행이 생긴 뒤 부른다). 본인도 다시 읽을 수는 없다 */
+export async function agreeTerms(): Promise<void> {
+  if (USE_MOCK_API) return mock.agreeTerms();
+  const user = await requireAuthUser();
+  const { error } = await sb().from('users').update({ terms_agreed_at: new Date().toISOString() }).eq('id', user.id);
+  if (error) throw toApiError(error, '약관 동의를 저장하지 못했어요');
+}
+
+/**
+ * S04 '회원 탈퇴'. 성공하면 이 기기의 로그인도 지운다 → 화면은 로그인(S02)으로 보낸다.
+ * 서버(delete-account): 내 메시지를 '탈퇴한 사용자'로 표시 → 모든 방에서 나가기(방장이면 넘기기) → 사진 삭제 → 계정 삭제
+ */
+export async function deleteAccount(): Promise<void> {
+  if (USE_MOCK_API) return mock.deleteAccount();
+  await requireAuthUser();
+  const { error } = await sb().functions.invoke('delete-account', { method: 'POST' });
+  if (error) {
+    if (error instanceof FunctionsHttpError) {
+      const body = (await error.context.json().catch(() => null)) as { error?: string; code?: ApiError['code'] } | null;
+      if (body?.error) throw new ApiError(body.error, body.code ?? 'not_allowed');
+    }
+    throw toApiError(error, '탈퇴 처리 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요');
+  }
+  // 서버에서 계정이 지워져 서버 로그아웃은 실패할 수 있다 → 이 기기 세션만 지운다
+  await sb().auth.signOut({ scope: 'local' }).catch(() => {});
 }
 
 /** S13: 메이트 정보 (하트 수, 후기 항목별 합계, 만남 횟수). 누가 남겼는지는 서버에서 숨긴다 */

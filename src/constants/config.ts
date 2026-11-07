@@ -50,4 +50,9 @@ export const HEART_THRESHOLD = 3; // 5문항 중 3개 이상 체크하면 하트
 export const ACTIVE_WITHIN_MINUTES = 15; // 최근 15분 안에 앱을 쓴 사람 = 활동 중 (서버 is_user_active와 같게)
 export const ACTIVE_PING_MINUTES = 5; // 앱이 켜져 있는 동안 이 간격으로 활동 신호를 보낸다
 
-// 신고 기능은 삭제하고 차단만 구현한다 (10/31 회의).
+// 신고: 10/31 회의에서 뺐다가 플레이스토어 정책(사용자 생성 콘텐츠) 때문에 다시 넣었다 (11/6 결정 8번). 차단도 그대로.
+
+// ── 약관·처리방침 공개 주소 (11/6 결정 9번) ──
+// 노션 등에 docs/legal/*.md를 올린 뒤 주소를 넣는다. 비어 있으면 앱에서 '준비 중' 안내가 뜬다
+export const PRIVACY_POLICY_URL = '';
+export const TERMS_URL = '';

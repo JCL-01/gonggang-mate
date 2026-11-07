@@ -15,10 +15,11 @@ import * as games from '@/api/games';
 import * as messages from '@/api/messages';
 import * as places from '@/api/places';
 import * as posts from '@/api/posts';
+import * as reports from '@/api/reports';
 import * as reviews from '@/api/reviews';
 import * as rooms from '@/api/rooms';
 import * as users from '@/api/users';
 
-export const api = { auth, users, freeSlots, posts, rooms, messages, appointments, reviews, blocks, places, games };
+export const api = { auth, users, freeSlots, posts, rooms, messages, appointments, reviews, blocks, places, games, reports };
 
 export * from '@/api/types';

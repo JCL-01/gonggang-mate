@@ -78,7 +78,7 @@ export async function openDirectRoom(userId: string): Promise<string> {
   return data as string;
 }
 
-/** S12 메뉴 '나가기' (게시물 방의 방장은 못 나감 → 게시물 삭제로 대신. 1:1 방은 누구나 나갈 수 있음) */
+/** S12 메뉴 '나가기'. 방장이 나가면 가장 먼저 들어온 사람이 새 방장 (11/6 결정 5번). 시작 전 약속이 있으면 약속 참여도 취소 */
 export async function leaveRoom(roomId: string): Promise<void> {
   if (USE_MOCK_API) return mock.leaveRoom(roomId);
   const { error } = await sb().rpc('leave_room', { p_room_id: roomId });

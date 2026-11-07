@@ -34,7 +34,7 @@ export async function sendMessage(roomId: string, body: string): Promise<Message
   requireMember(roomId, meId);
   const text = body.trim();
   if (!text) throw new ApiError('메시지를 입력해 주세요', 'invalid_input');
-  const message: Message = { id: newId('m'), room_id: roomId, sender_id: meId, type: 'text', body: text, payload: null, created_at: nowIso() };
+  const message: Message = { id: newId('m'), room_id: roomId, sender_id: meId, type: 'text', body: text, payload: null, sender_deleted: false, created_at: nowIso() };
   db.messages.push(message);
   emitMessage(message);
   return copy(toItem(message, meId));

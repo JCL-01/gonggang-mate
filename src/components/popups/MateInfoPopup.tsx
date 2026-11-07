@@ -4,6 +4,7 @@
  * 쓰는 쪽 입력값(userId, onClose, onBlocked)은 그대로다. 관심활동·학과는 넣지 않는다 (11/3 결정 6번, 데이터 없음).
  * 후기는 누가 남겼는지 숨기고 항목별 합계만 보여 준다. 내 정보에는 '차단' 버튼이 없다.
  * 11/3 추가: 현재 활동 중 표시(최근 15분), '1:1 채팅' 버튼(같은 두 사람의 방은 하나, 차단 사이엔 정보 자체가 안 보임)
+ * 11/6 결정 8번: '신고하기'(사용자·프로필 사진). 신고창은 이 Modal 안에 둔다
  */
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -14,6 +15,7 @@ import { api, ApiError, type MateInfo } from '@/api';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { ReportSheet } from '@/components/popups/ReportSheet';
 import { TopReviews } from '@/components/TopReviews';
 import { colors, fontSize, radius, spacing } from '@/constants/theme';
 
@@ -31,6 +33,7 @@ export function MateInfoPopup({ userId, onClose, onBlocked }: Props) {
   const [isMe, setIsMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [reporting, setReporting] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -160,14 +163,21 @@ export function MateInfoPopup({ userId, onClose, onBlocked }: Props) {
               {!isMe ? (
                 <View style={styles.footer}>
                   <Button label="1:1 채팅 하기" onPress={onDirectChat} disabled={busy} />
-                  <Pressable accessibilityRole="button" onPress={onBlock} disabled={busy} style={styles.blockLink} hitSlop={8}>
-                    <Text style={styles.blockText}>{busy ? '처리 중...' : '차단하기'}</Text>
-                  </Pressable>
+                  <View style={styles.links}>
+                    <Pressable accessibilityRole="button" onPress={() => setReporting(true)} disabled={busy} style={styles.blockLink} hitSlop={8}>
+                      <Text style={styles.blockText}>신고하기</Text>
+                    </Pressable>
+                    <Text style={styles.linkDivider}>·</Text>
+                    <Pressable accessibilityRole="button" onPress={onBlock} disabled={busy} style={styles.blockLink} hitSlop={8}>
+                      <Text style={styles.blockText}>{busy ? '처리 중...' : '차단하기'}</Text>
+                    </Pressable>
+                  </View>
                 </View>
               ) : null}
             </>
           )}
         </SafeAreaView>
+        <ReportSheet target={reporting && userId ? { target_type: 'user', target_user_id: userId } : null} onClose={() => setReporting(false)} />
       </SafeAreaProvider>
     </Modal>
   );
@@ -202,6 +212,8 @@ const styles = StyleSheet.create({
   heartUnit: { color: colors.ink, fontSize: fontSize.body - 1, fontWeight: '600' },
   sectionTitle: { color: colors.ink, fontSize: fontSize.body + 1, fontWeight: '800', marginBottom: -spacing.xs },
   footer: { paddingHorizontal: spacing.lg - 4, paddingTop: spacing.sm, paddingBottom: spacing.sm, gap: spacing.xs, alignItems: 'stretch' },
-  blockLink: { alignSelf: 'center', paddingVertical: spacing.sm },
+  links: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: spacing.md },
+  linkDivider: { color: colors.line },
+  blockLink: { paddingVertical: spacing.sm },
   blockText: { color: colors.sub, fontSize: fontSize.body - 1, textDecorationLine: 'underline' },
 });

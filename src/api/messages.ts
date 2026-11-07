@@ -11,7 +11,7 @@ import { ApiError, type MessageItem, type MiniUser } from '@/api/types';
 import type { Message } from '@/types/db';
 
 const BLOCKED_TEXT = '차단한 사용자의 메시지입니다';
-const MESSAGE_COLUMNS = 'id, room_id, sender_id, type, body, payload, created_at, sender:users!sender_id(id, nickname, photo_url)';
+const MESSAGE_COLUMNS = 'id, room_id, sender_id, sender_deleted, type, body, payload, created_at, sender:users!sender_id(id, nickname, photo_url)';
 
 type MessageRow = Message & { sender: MiniUser | null };
 

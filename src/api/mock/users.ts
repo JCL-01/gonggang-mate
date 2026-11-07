@@ -69,3 +69,23 @@ export async function touchActive(): Promise<void> {
   const meId = db.session.userId;
   if (meId) db.activeAt[meId] = Date.now();
 }
+
+/** S04: 프로필 사진 올리기 (가짜: 로컬 주소를 그대로 돌려준다) */
+export async function uploadProfilePhoto(localUri: string): Promise<string> {
+  await delay(400);
+  requireMeId();
+  return localUri;
+}
+
+/** S03: 약관 동의 (가짜: 기록만) */
+export async function agreeTerms(): Promise<void> {
+  await delay(100);
+  requireMeId();
+}
+
+/** S04: 회원 탈퇴 (가짜: 로그아웃만. 가짜 데이터는 앱을 다시 켜면 처음으로 돌아간다) */
+export async function deleteAccount(): Promise<void> {
+  await delay(600);
+  requireMeId();
+  db.session.userId = null;
+}

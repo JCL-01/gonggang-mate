@@ -101,7 +101,8 @@ export type MessageType = 'text' | 'system' | 'game_result';
 export interface Message {
   id: string;
   room_id: string;
-  sender_id: string | null; // null이면 시스템 메시지
+  sender_id: string | null; // null이면 시스템 메시지 (단, sender_deleted면 탈퇴한 사람의 메시지)
+  sender_deleted: boolean; // 보낸 사람이 탈퇴함 → '탈퇴한 사용자'로 표시 (11/6 결정 7번)
   type: MessageType;
   body: string;
   payload: GameResultPayload | null;
@@ -203,7 +204,8 @@ export type NotificationType =
   | 'appointment_soon'
   | 'review_request'
   | 'member_canceled'
-  | 'host_canceled';
+  | 'host_canceled'
+  | 'host_changed'; // 새 방장에게: 방장이 나가서 내가 방장이 됐어요 (ref_id = 채팅방 id, 11/6 결정 5번)
 
 export interface AppNotification {
   id: string;

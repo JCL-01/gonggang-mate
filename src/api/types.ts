@@ -96,7 +96,7 @@ export type RoomListItem = {
   partner: MiniUser | null; // 1:1 방의 상대
   members: MiniUser[]; // 겹친 아바타용
   member_count: number;
-  last_message: { sender_nickname: string | null; body: string; created_at: Timestamp } | null;
+  last_message: { sender_nickname: string | null; sender_deleted?: boolean; body: string; created_at: Timestamp } | null;
   unread_count: number;
   is_host: boolean;
   pending_request_count: number; // 방장에게만 의미 있음
@@ -127,6 +127,13 @@ export type MessageItem = Message & {
   sender: MiniUser | null; // null = 시스템 메시지
   is_mine: boolean;
 };
+
+/** 신고 (11/6 결정 8번). 메시지·게시글은 target_id, 사용자(프로필 사진 포함)는 target_user_id만 */
+export type ReportReason = 'abuse' | 'sexual' | 'spam' | 'fake' | 'etc';
+export type ReportInput =
+  | { target_type: 'message'; target_id: string; target_user_id: string | null; reason: ReportReason; detail?: string }
+  | { target_type: 'post'; target_id: string; target_user_id: string | null; reason: ReportReason; detail?: string }
+  | { target_type: 'user'; target_user_id: string; reason: ReportReason; detail?: string };
 
 /** S14 약속 확정 입력 */
 export type ConfirmAppointmentInput = {

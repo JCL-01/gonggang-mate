@@ -3,6 +3,7 @@
  * - 프로필 카드: 사진(없으면 사람 아이콘), 닉네임(필수, 2~10자, 중복 불가), 한줄소개(최대 40자), 성별(필수, 디자인에 없어 카드 안에 추가)
  * - 내 메이트하트(개수 + 막대), 대표 후기(많이 받은 후기 항목 상위 3개, 11/6 결정 6번) — 기존 사용자만
  * - 차단 목록 보기·해제(PRD 8.2, 디자인에 없어 카드로 추가), 로그아웃, 저장 버튼(디자인에 없어 하단에 추가)
+ * - 11/6 결정: 프로필 사진(앨범에서 고르기·삭제, '저장'을 눌러야 반영), 앱 정보(가이드·이용약관·개인정보처리방침), 회원 탈퇴
  * - 관심활동은 넣지 않는다 (11/3 결정 6번)
  * - 신규 가입자(mode=new): 회원가입 중 프로필 저장이 끊긴 경우의 예비 화면. 뒤로가기 없음, 버튼 "저장하고 시작하기"
  */
@@ -20,6 +21,8 @@ import { TopReviews } from '@/components/TopReviews';
 import { TextField } from '@/components/TextField';
 import { BIO_MAX_LENGTH, NICKNAME_MAX_LENGTH, NICKNAME_MIN_LENGTH } from '@/constants/config';
 import { colors, fontSize, radius, spacing } from '@/constants/theme';
+import { openLegal } from '@/lib/openLegal';
+import { pickProfilePhoto } from '@/lib/profilePhoto';
 
 /** 메이트하트 막대가 가득 차는 개수 (보기용) */
 const HEART_BAR_MAX = 20;
@@ -39,6 +42,9 @@ export default function SettingsScreen() {
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [blocked, setBlocked] = useState<MiniUser[]>([]);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoChanged, setPhotoChanged] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -64,7 +70,7 @@ export default function SettingsScreen() {
 
   const trimmed = nickname.trim();
   const nicknameInvalid = trimmed.length < NICKNAME_MIN_LENGTH || trimmed.length > NICKNAME_MAX_LENGTH;
-  const canSave = !loading && !saving && !nicknameInvalid && gender !== null;
+  const canSave = !loading && !saving && !photoBusy && !nicknameInvalid && gender !== null;
 
   const onSave = async () => {
     if (!canSave || !gender) return;
@@ -98,6 +104,66 @@ export default function SettingsScreen() {
         },
       },
     ]);
+  };
+
+  // 프로필 사진: 앨범에서 골라 바로 올리고, '저장'을 누르면 프로필에 반영된다
+  const onPhoto = () => {
+    const choose = async () => {
+      try {
+        const localUri = await pickProfilePhoto();
+        if (!localUri) return;
+        setPhotoBusy(true);
+        setPhotoUrl(await api.users.uploadProfilePhoto(localUri));
+        setPhotoChanged(true);
+      } catch (e) {
+        Alert.alert(e instanceof ApiError ? e.message : '사진을 올리지 못했어요');
+      } finally {
+        setPhotoBusy(false);
+      }
+    };
+    if (!photoUrl) {
+      choose();
+      return;
+    }
+    Alert.alert('프로필 사진', undefined, [
+      { text: '앨범에서 선택', onPress: choose },
+      {
+        text: '사진 삭제',
+        style: 'destructive',
+        onPress: () => {
+          setPhotoUrl(null);
+          setPhotoChanged(true);
+        },
+      },
+      { text: '취소', style: 'cancel' },
+    ]);
+  };
+
+  // 회원 탈퇴 (11/6 결정 7번): 되돌릴 수 없어서 무엇이 지워지고 남는지 알려 준 뒤 한 번 더 묻는다
+  const onDeleteAccount = () => {
+    Alert.alert(
+      '정말 탈퇴할까요?',
+      '프로필, 공강 시간, 게시글, 약속이 지워지고 되돌릴 수 없어요.\n방장인 채팅방은 다음 메이트에게 넘어가고, 보낸 메시지는 "탈퇴한 사용자"로 남아요.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '탈퇴',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              await api.users.deleteAccount();
+              Alert.alert('탈퇴했어요', '그동안 공강메이트를 이용해 주셔서 고마워요.');
+              router.replace('/login');
+            } catch (e) {
+              Alert.alert(e instanceof ApiError ? e.message : '탈퇴 처리 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요');
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
   };
 
   const onLogout = () => {
@@ -142,9 +208,19 @@ export default function SettingsScreen() {
     >
       {/* 프로필 카드 */}
       <View style={styles.card}>
-        <View style={styles.avatar}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={photoUrl ? '프로필 사진 바꾸기' : '프로필 사진 등록'}
+          onPress={onPhoto}
+          disabled={photoBusy}
+          style={styles.avatar}
+        >
           <Avatar nickname={trimmed || '?'} photoUrl={photoUrl} size={80} />
-        </View>
+          <View style={styles.photoBadge}>
+            {photoBusy ? <ActivityIndicator size="small" color={colors.white} /> : <Icon name="camera" size={14} color={colors.white} />}
+          </View>
+        </Pressable>
+        {photoChanged ? <Text style={styles.photoHint}>아래 저장 버튼을 눌러야 사진이 반영돼요</Text> : null}
         <TextField
           label="닉네임"
           inlineLabel
@@ -207,10 +283,15 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>앱 정보</Text>
           <View style={[styles.card, styles.menuCard]}>
             <MenuRow icon="book-open" label="앱 사용 가이드 다시 보기" onPress={() => router.push({ pathname: '/guide', params: { replay: '1' } })} />
+            <MenuRow icon="file-text" label="이용약관" onPress={() => openLegal('terms')} />
+            <MenuRow icon="shield" label="개인정보처리방침" onPress={() => openLegal('privacy')} />
           </View>
 
           <Pressable accessibilityRole="button" onPress={onLogout} style={styles.logout} hitSlop={8}>
             <Text style={styles.logoutText}>로그아웃</Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" onPress={onDeleteAccount} disabled={deleting} style={styles.withdraw} hitSlop={8}>
+            <Text style={styles.withdrawText}>{deleting ? '탈퇴 처리 중…' : '회원 탈퇴'}</Text>
           </Pressable>
         </>
       ) : null}
@@ -239,7 +320,21 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     backgroundColor: colors.white,
   },
-  avatar: { alignItems: 'center', marginBottom: spacing.xs },
+  avatar: { alignSelf: 'center', marginBottom: spacing.xs },
+  photoBadge: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: colors.white,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoHint: { color: colors.primaryBright, fontSize: fontSize.caption, textAlign: 'center', marginTop: -spacing.xs },
   cardTitle: { color: colors.ink, fontSize: fontSize.body + 1, fontWeight: '800' },
   sectionTitle: { color: colors.ink, fontSize: fontSize.body + 1, fontWeight: '800', marginBottom: -spacing.xs },
   heartRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -255,6 +350,8 @@ const styles = StyleSheet.create({
   menuLabel: { flex: 1, color: colors.ink, fontSize: fontSize.body, fontWeight: '600' },
   pressed: { opacity: 0.6 },
   logout: { alignSelf: 'flex-start', paddingVertical: spacing.sm },
+  withdraw: { alignSelf: 'flex-start', paddingVertical: spacing.xs, marginTop: -spacing.sm },
+  withdrawText: { color: colors.sub, fontSize: fontSize.caption + 1 },
   logoutText: { color: colors.sub, fontSize: fontSize.body - 1, textDecorationLine: 'underline' },
   error: { color: colors.danger, fontSize: fontSize.caption + 1, textAlign: 'center' },
 });

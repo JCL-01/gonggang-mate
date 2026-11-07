@@ -81,6 +81,7 @@ export async function shareGame(gameRunId: string): Promise<void> {
     id: newId('m'),
     room_id: run.room_id,
     sender_id: meId,
+    sender_deleted: false,
     type: 'game_result',
     body: `${GAME_INFO[run.type].label} 결과`,
     payload: { game_run_id: run.id, type: run.type, options: run.options, result: run.result },

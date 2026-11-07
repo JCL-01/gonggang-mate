@@ -1,6 +1,7 @@
 /** 가짜 약속 (api/appointments.ts의 USE_MOCK_API 모드). Supabase 연결 후 지운다. */
 import { ApiError, type AppointmentItem, type ConfirmAppointmentInput, type MyAppointments } from '@/api/types';
-import { findRoom, findUser, requireMeId, requireMember, roomMemberIds, toMini } from '@/api/mock/helpers';
+import { findRoom, requireMeId, requireMember, roomMemberIds, toMini } from '@/api/mock/helpers';
+import { leaveRoomAs } from '@/api/mock/rooms';
 import { addSystemMessage, copy, db, delay, newId, nowIso } from '@/api/mock/store';
 import type { Appointment } from '@/types/db';
 
@@ -73,7 +74,7 @@ export async function getMyAppointments(): Promise<MyAppointments> {
   });
 }
 
-/** S15 '약속 취소' (확인 팝업 후). 방장이면 약속 전체 취소 */
+/** S15 '약속 취소' (확인 팝업 후). 방장도 빠지고 다음 사람이 방장 (11/6 결정 5번) */
 export async function cancelAppointment(appointmentId: string): Promise<void> {
   await delay();
   const meId = requireMeId();
@@ -81,23 +82,9 @@ export async function cancelAppointment(appointmentId: string): Promise<void> {
   if (!a) throw new ApiError('약속을 찾을 수 없어요', 'not_found');
   requireMember(a.room_id, meId);
   if (new Date(a.start_at).getTime() <= Date.now()) throw new ApiError('시작한 약속은 취소할 수 없어요', 'not_allowed');
-  const room = findRoom(a.room_id);
-  const nickname = findUser(meId).nickname;
-  const member = db.appointmentMembers.find((m) => m.appointment_id === a.id && m.user_id === meId);
-  if (member) member.canceled_at = nowIso();
-
-  if (room.host_id === meId) {
-    a.status = 'canceled';
-    addSystemMessage(room.id, '방장이 약속을 취소했어요');
-    const post = db.posts.find((p) => p.id === room.post_id);
-    if (post) post.status = 'closed';
-    db.appointmentMembers.forEach((m) => {
-      if (m.appointment_id === a.id && !m.canceled_at) m.seen_at = null;
-    });
-    return;
-  }
-  db.members = db.members.filter((m) => !(m.room_id === room.id && m.user_id === meId));
-  addSystemMessage(room.id, `${nickname}님이 약속을 취소하고 나갔어요`);
+  if (a.status !== 'confirmed') throw new ApiError('이미 취소된 약속이에요', 'not_allowed');
+  // 방장도 일반 참여자처럼 빠지고, 방장은 다음 사람에게 넘어간다 (11/6 결정 5번)
+  leaveRoomAs(a.room_id, meId);
 }
 
 /** 하단 탭 약속카드 숫자 배지: 아직 확인 안 한 약속 수 (방장이 취소한 약속 포함) */

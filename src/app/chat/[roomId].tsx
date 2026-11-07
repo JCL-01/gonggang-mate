@@ -5,7 +5,9 @@
  * - 메시지: 구독을 먼저 시작하고 목록을 불러와 id로 합친다 (api/messages.ts 사용법). 위로 올리면 이전 메시지
  * - 시스템 메시지(입장·나가기·약속 확정)가 오면 상단 정보(인원, 약속 여부)를 다시 불러온다
  * - 채팅 요청은 실시간 구독이 없어서 보고 있는 동안 REFRESH_MS마다 다시 불러온다
- * - 메뉴: 메이트는 '나가기' (약속이 있으면 약속 취소와 같음, 11/3 결정), 방장은 '게시물 삭제' (약속 확정 전만)
+ * - 메뉴: '나가기' (약속이 있으면 약속 취소와 같음, 11/3 결정). 방장이 나가면 가장 먼저 들어온 메이트가 새 방장 (11/6 결정 5번).
+ *   방장은 '게시물 삭제'(약속 확정 전만), 메이트는 '게시글 신고'
+ * - 11/6 결정: 다른 사람 메시지를 길게 누르면 신고(8번), 탈퇴한 사람의 메시지는 '탈퇴한 사용자'(7번)
  * 11/3 결정 12번: 1:1 방(room.kind = 'direct')은 post가 없다. 제목은 상대 닉네임, 대화와 게임만 (약속 확정 없음), 메뉴는 '나가기'만.
  * 디자인팀 UI 반영(11/4, A): 상단 참여자 이름 칩, '약속 확정' 알약 버튼, 이름이 들어간 말풍선과 시간, 날짜 구분,
  *   입력창 옆 게임 버튼 → 미니게임 선택창(아래에서 올라옴) → 바로 게임 설정 화면. 디자인에 없는 채팅 요청·게시물 요약은 같은 형식으로 추가.
@@ -34,6 +36,7 @@ import { BottomSheet } from '@/components/popups/BottomSheet';
 import { Button } from '@/components/Button';
 import { ConfirmAppointmentPopup } from '@/components/popups/ConfirmAppointmentPopup';
 import { MateInfoPopup } from '@/components/popups/MateInfoPopup';
+import { type ReportTarget, ReportSheet } from '@/components/popups/ReportSheet';
 import { categoryInfo, colors, fontSize, MIN_TOUCH, radius, spacing } from '@/constants/theme';
 import { describeGameResult, GAME_CARD, GAME_INFO, GAME_TYPES } from '@/lib/gameResult';
 import { formatDate, formatDateRange, kstMinutesOfDay, minutesToTime } from '@/lib/time';
@@ -63,6 +66,7 @@ export default function ChatRoomScreen() {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [mateId, setMateId] = useState<string | null>(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [gameSheet, setGameSheet] = useState(false); // 미니게임 선택창
   const [myId, setMyId] = useState<string | null>(null); // 상단 이름 칩에서 나를 빼려고
@@ -230,27 +234,51 @@ export default function ChatRoomScreen() {
       return;
     }
     const post = room.post;
-    if (room.is_host && room.appointment_id) {
-      Alert.alert('방장은 채팅방을 나갈 수 없어요', '약속을 취소하려면 약속카드에서 취소해 주세요.', [
-        { text: '닫기', style: 'cancel' },
-        { text: '약속카드 보기', onPress: () => router.push('/appointments') },
-      ]);
-    } else if (room.is_host) {
-      confirmAndLeave(
-        '게시물을 삭제할까요?',
-        '방장은 채팅방을 나갈 수 없어서 게시물을 삭제해야 해요. 매칭 목록과 채팅 목록에서 함께 사라져요.',
-        '삭제',
-        () => api.posts.deletePost(post.id),
-        '게시물을 삭제하지 못했어요',
-      );
-    } else {
+    const leave = () =>
       confirmAndLeave(
         '채팅방을 나갈까요?',
-        room.appointment_id ? '확정된 약속도 함께 취소돼요.' : '다시 들어오려면 채팅 요청을 다시 보내야 해요.',
+        room.is_host
+          ? room.appointment_id
+            ? '확정된 약속에서도 빠지고, 가장 먼저 들어온 메이트가 새 방장이 돼요.'
+            : '가장 먼저 들어온 메이트가 새 방장이 돼요. 혼자 있는 방이면 게시물이 내려가요.'
+          : room.appointment_id
+            ? '확정된 약속에서도 빠져요.'
+            : '다시 들어오려면 채팅 요청을 다시 보내야 해요.',
         '나가기',
         () => api.rooms.leaveRoom(roomId),
         '채팅방을 나가지 못했어요',
       );
+    // 안드로이드 알림창은 버튼이 3개까지라 메뉴마다 3개 이하로 둔다
+    if (room.is_host) {
+      Alert.alert('채팅방 메뉴', undefined, [
+        ...(!room.appointment_id
+          ? [
+              {
+                text: '게시물 삭제',
+                style: 'destructive' as const,
+                onPress: () =>
+                  confirmAndLeave(
+                    '게시물을 삭제할까요?',
+                    '매칭 목록과 채팅 목록에서 함께 사라지고, 모든 메이트가 채팅방에서 나가게 돼요.',
+                    '삭제',
+                    () => api.posts.deletePost(post.id),
+                    '게시물을 삭제하지 못했어요',
+                  ),
+              },
+            ]
+          : []),
+        { text: '나가기', onPress: leave },
+        { text: '취소', style: 'cancel' },
+      ]);
+    } else {
+      Alert.alert('채팅방 메뉴', undefined, [
+        {
+          text: '게시글 신고',
+          onPress: () => setReportTarget({ target_type: 'post', target_id: post.id, target_user_id: room.host.id }),
+        },
+        { text: '나가기', onPress: leave },
+        { text: '취소', style: 'cancel' },
+      ]);
     }
   };
 
@@ -365,7 +393,13 @@ export default function ChatRoomScreen() {
               return (
                 <View>
                   {newDay ? <DateChip at={item.created_at} /> : null}
-                  <MessageRow message={item} showSender={firstOfGroup || newDay} nameOf={nameOf} onPressAvatar={setMateId} />
+                  <MessageRow
+                    message={item}
+                    showSender={firstOfGroup || newDay}
+                    nameOf={nameOf}
+                    onPressAvatar={setMateId}
+                    onReport={() => setReportTarget({ target_type: 'message', target_id: item.id, target_user_id: item.sender_id })}
+                  />
                 </View>
               );
             }}
@@ -447,6 +481,7 @@ export default function ChatRoomScreen() {
       </BottomSheet>
 
       <MateInfoPopup userId={mateId} onClose={() => setMateId(null)} onBlocked={() => reloadMessages().catch(() => {})} />
+      <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
       <ConfirmAppointmentPopup
         visible={confirmOpen}
         roomId={roomId}
@@ -499,18 +534,38 @@ function DateChip({ at }: { at: string }) {
   );
 }
 
+const DELETED_USER = '탈퇴한 사용자';
+
 function MessageRow({
   message,
   showSender,
   nameOf,
   onPressAvatar,
+  onReport,
 }: {
   message: MessageItem;
   showSender: boolean;
   nameOf: (userId: string) => string;
   onPressAvatar: (userId: string) => void;
+  /** 다른 사람 메시지를 길게 누르면 (11/6 결정 8번) */
+  onReport: () => void;
 }) {
   const { sender, payload } = message;
+  // 탈퇴한 사람의 메시지 (11/6 결정 7번): 보낸 사람이 지워져 sender가 없다
+  if (message.sender_deleted && message.type === 'text') {
+    return (
+      <View style={[styles.rowOther, showSender && styles.groupGap]}>
+        <View style={styles.avatarSlot}>{showSender ? <Avatar nickname={DELETED_USER} size={36} /> : null}</View>
+        <Pressable onLongPress={onReport} delayLongPress={400} style={[styles.bubble, styles.bubbleOther]}>
+          <Text style={styles.body}>
+            {showSender ? <Text style={[styles.senderName, styles.deletedName]}>{DELETED_USER}: </Text> : null}
+            {message.body}
+          </Text>
+          <Text style={styles.time}>{minutesToTime(kstMinutesOfDay(message.created_at))}</Text>
+        </Pressable>
+      </View>
+    );
+  }
   if (message.type === 'system' || !sender) {
     return (
       <View style={styles.systemChip}>
@@ -563,13 +618,18 @@ function MessageRow({
           </Pressable>
         ) : null}
       </View>
-      <View style={[styles.bubble, styles.bubbleOther]}>
+      <Pressable
+        onLongPress={onReport}
+        delayLongPress={400}
+        accessibilityHint="길게 누르면 신고할 수 있어요"
+        style={[styles.bubble, styles.bubbleOther]}
+      >
         <Text style={styles.body}>
           {showSender ? <Text style={styles.senderName}>{sender.nickname}: </Text> : null}
           {message.body}
         </Text>
         {time}
-      </View>
+      </Pressable>
     </View>
   );
 }
@@ -617,6 +677,7 @@ const styles = StyleSheet.create({
   rowOther: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
   avatarSlot: { width: 36 },
   senderName: { fontWeight: '700' },
+  deletedName: { color: colors.sub },
   bubble: { maxWidth: '78%', paddingHorizontal: spacing.md - 2, paddingVertical: spacing.sm + 2, borderRadius: 18, gap: 4 },
   bubbleMine: { backgroundColor: colors.primary, borderBottomRightRadius: 6 },
   bubbleOther: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, borderBottomLeftRadius: 6 },
