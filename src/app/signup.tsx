@@ -2,7 +2,8 @@
  * S03 회원가입 — 담당: A (디자인팀 UI 반영)
  * 11/3 결정: 프로필(닉네임·성별·한줄소개)도 이 화면에서 함께 입력한다. ID 칸은 없다 (학교 이메일 = 아이디).
  * 흐름: 학교 이메일 → '인증요청' → 6자리 코드 '확인' → 비밀번호·확인 → 닉네임 '중복 확인' → 성별 → (한줄소개) → '가입하기'
- *       가입하기 = signUp(비밀번호) + updateMe(프로필) → S05 메인
+ *       가입하기 = signUp(비밀번호) + updateMe(프로필) + agreeTerms(약관 동의 시각) → S05 메인
+ *       11/6 결정 8·9번: 이용약관·개인정보처리방침 동의(필수) 체크가 있어야 가입할 수 있다
  * - 이메일 인증, 닉네임 중복 확인, 성별을 마쳐야 '가입하기'가 켜진다
  * - 학교 도메인이 아니면 "학교 이메일만 가입할 수 있어요"
  * - 인증 코드 재발송은 60초에 한 번 (남은 초 표시)
@@ -20,6 +21,7 @@ import { Icon } from '@/components/Icon';
 import { TextField } from '@/components/TextField';
 import { BIO_MAX_LENGTH, NICKNAME_MAX_LENGTH, NICKNAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from '@/constants/config';
 import { colors, fontSize, radius, spacing } from '@/constants/theme';
+import { openLegal } from '@/lib/openLegal';
 
 const RESEND_SECONDS = 60;
 
@@ -42,6 +44,7 @@ export default function SignupScreen() {
   const [checkedNickname, setCheckedNickname] = useState<string | null>(null); // 중복 확인을 통과한 닉네임
   const [nicknameMsg, setNicknameMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [gender, setGender] = useState<Gender | null>(null);
+  const [agreed, setAgreed] = useState(false);
   const [bio, setBio] = useState('');
   // 제출
   const [busy, setBusy] = useState<'send' | 'verify' | 'nickname' | 'signup' | null>(null);
@@ -113,7 +116,7 @@ export default function SignupScreen() {
   const confirmError = confirm.length > 0 && confirm !== password ? '비밀번호가 일치하지 않아요' : null;
   const passwordOk = password.length >= PASSWORD_MIN_LENGTH && confirm === password;
   const nicknameOk = checkedNickname !== null && checkedNickname === trimmedNickname;
-  const canSubmit = verified && passwordOk && nicknameOk && gender !== null && busy === null;
+  const canSubmit = verified && passwordOk && nicknameOk && gender !== null && agreed && busy === null;
 
   // 아직 안 한 것 안내 (가입하기 버튼 위)
   const todo = !verified
@@ -124,7 +127,9 @@ export default function SignupScreen() {
         ? '닉네임 중복 확인을 해 주세요'
         : gender === null
           ? '성별을 선택해 주세요'
-          : null;
+          : !agreed
+            ? '이용약관과 개인정보처리방침에 동의해 주세요'
+            : null;
 
   const onSignup = async () => {
     if (!canSubmit || !gender) return;
@@ -136,6 +141,7 @@ export default function SignupScreen() {
         setAccountCreated(true);
       }
       await api.users.updateMe({ nickname: trimmedNickname, gender, bio: bio.trim() || null, photo_url: null });
+      await api.users.agreeTerms();
       router.replace('/home');
     } catch (e) {
       const msg = message(e, '가입하지 못했어요. 다시 시도해 주세요');
@@ -289,6 +295,29 @@ export default function SignupScreen() {
         maxLength={BIO_MAX_LENGTH}
         showCount
       />
+      {/* 약관 동의 (필수) */}
+      <View style={styles.agreeRow}>
+        <Pressable
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: agreed }}
+          accessibilityLabel="이용약관과 개인정보처리방침에 동의해요, 필수"
+          onPress={() => setAgreed((v) => !v)}
+          hitSlop={6}
+          style={styles.agreeCheck}
+        >
+          <View style={[styles.checkbox, agreed && styles.checkboxOn]}>{agreed ? <Icon name="check" size={14} color={colors.white} /> : null}</View>
+        </Pressable>
+        <Text style={styles.agreeText}>
+          <Text style={styles.agreeLink} onPress={() => openLegal('terms')} accessibilityRole="link">
+            이용약관
+          </Text>
+          과{' '}
+          <Text style={styles.agreeLink} onPress={() => openLegal('privacy')} accessibilityRole="link">
+            개인정보처리방침
+          </Text>
+          에 동의해요 <Text style={styles.agreeRequired}>(필수)</Text>
+        </Text>
+      </View>
       <Text style={styles.requiredNote}>*은 필수 입력 항목입니다</Text>
     </FormScreen>
   );
@@ -313,6 +342,13 @@ const styles = StyleSheet.create({
   checkChipDone: { backgroundColor: colors.primary, borderColor: colors.primary },
   checkChipText: { color: colors.primary, fontSize: fontSize.caption + 1, fontWeight: '800' },
   checkChipTextDone: { color: colors.white },
+  agreeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
+  agreeCheck: { padding: 2 },
+  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1.5, borderColor: colors.primarySoft, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
+  checkboxOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  agreeText: { flex: 1, color: colors.ink, fontSize: fontSize.body - 1, lineHeight: 20 },
+  agreeLink: { color: colors.primary, fontWeight: '800', textDecorationLine: 'underline' },
+  agreeRequired: { color: colors.primaryBright, fontWeight: '700' },
   requiredNote: { color: colors.sub, fontSize: fontSize.caption, textAlign: 'center' },
   todo: { color: colors.sub, fontSize: fontSize.caption + 1, textAlign: 'center' },
   error: { color: colors.danger, fontSize: fontSize.caption + 1, textAlign: 'center' },

@@ -152,11 +152,13 @@ function seed() {
   ];
 
   const messages: Message[] = [
-    { id: 'm-1', room_id: 'r-5', sender_id: null, type: 'system', body: '밥심님이 채팅방에 들어왔어요', payload: null, created_at: minutesFromNow(-30) },
-    { id: 'm-2', room_id: 'r-5', sender_id: 'u-2', type: 'text', body: '안녕하세요! 수요일 10시 괜찮아요', payload: null, created_at: minutesFromNow(-29) },
-    { id: 'm-3', room_id: 'r-5', sender_id: ME_ID, type: 'text', body: '좋아요 학생식당 앞에서 봬요', payload: null, created_at: minutesFromNow(-28) },
-    { id: 'm-4', room_id: 'r-up', sender_id: null, type: 'system', body: '약속이 확정되었어요', payload: null, created_at: minutesFromNow(-10) },
-    { id: 'm-5', room_id: 'r-up', sender_id: 'u-2', type: 'text', body: '정문에서 만나요!', payload: null, created_at: minutesFromNow(-5) },
+    { id: 'm-1', room_id: 'r-5', sender_id: null, type: 'system', body: '밥심님이 채팅방에 들어왔어요', payload: null, sender_deleted: false, created_at: minutesFromNow(-30) },
+    { id: 'm-2', room_id: 'r-5', sender_id: 'u-2', type: 'text', body: '안녕하세요! 수요일 10시 괜찮아요', payload: null, sender_deleted: false, created_at: minutesFromNow(-29) },
+    { id: 'm-3', room_id: 'r-5', sender_id: ME_ID, type: 'text', body: '좋아요 학생식당 앞에서 봬요', payload: null, sender_deleted: false, created_at: minutesFromNow(-28) },
+    // 탈퇴한 사람의 메시지 (11/6 결정 7번): 보낸 사람이 지워져 sender_id가 null, sender_deleted가 true
+    { id: 'm-3b', room_id: 'r-5', sender_id: null, type: 'text', body: '저도 같이 가도 될까요?', payload: null, sender_deleted: true, created_at: minutesFromNow(-27) },
+    { id: 'm-4', room_id: 'r-up', sender_id: null, type: 'system', body: '약속이 확정되었어요', payload: null, sender_deleted: false, created_at: minutesFromNow(-10) },
+    { id: 'm-5', room_id: 'r-up', sender_id: 'u-2', type: 'text', body: '정문에서 만나요!', payload: null, sender_deleted: false, created_at: minutesFromNow(-5) },
   ];
 
   const appointments: Appointment[] = [
@@ -218,7 +220,7 @@ export function addMessageListener(roomId: string, fn: Listener): () => void {
 
 /** 시스템 메시지 추가 ("OO님이 들어왔어요" 등) */
 export function addSystemMessage(roomId: string, body: string): Message {
-  const message: Message = { id: newId('m'), room_id: roomId, sender_id: null, type: 'system', body, payload: null, created_at: nowIso() };
+  const message: Message = { id: newId('m'), room_id: roomId, sender_id: null, type: 'system', body, payload: null, sender_deleted: false, created_at: nowIso() };
   db.messages.push(message);
   emitMessage(message);
   return message;

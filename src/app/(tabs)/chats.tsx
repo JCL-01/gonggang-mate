@@ -168,7 +168,9 @@ export default function ChatsScreen() {
 /** 채팅방 한 줄 (디자인: 사진 · 이름 + 방장 태그 · 시간 / 미리보기 · 안 읽은 수) */
 function RoomRow({ room, onPress }: { room: RoomListItem; onPress: () => void }) {
   const last = room.last_message;
-  const preview = last ? (last.sender_nickname ? `${last.sender_nickname}: ${last.body}` : last.body) : '아직 메시지가 없어요';
+  // 탈퇴한 사람의 메시지는 보낸 사람 이름이 없다 (11/6 결정 7번)
+  const senderName = last?.sender_deleted ? '탈퇴한 사용자' : last?.sender_nickname;
+  const preview = last ? (senderName ? `${senderName}: ${last.body}` : last.body) : '아직 메시지가 없어요';
   const isDirect = room.kind === 'direct';
   // 게시물 방은 처음 들어온 사람(목록 맨 앞)이 방장이다
   const face = isDirect ? room.partner : room.members[0];

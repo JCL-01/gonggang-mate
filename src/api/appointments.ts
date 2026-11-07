@@ -5,7 +5,7 @@
  * - 확정: 방장만. 확정 시점의 채팅방 참여자 전원이 약속 참여자. 게시물 status → 'confirmed' (매칭 목록에서 내려감)
  *         대기 중인 채팅 요청은 자동 거절
  * - 참여자 취소: 약속에서 빠지고 채팅방에서 나감. 시작 전까지만
- * - 방장 취소: 약속 전체 취소 + 채팅방 닫힘 + 참여자 전원 알림 (지금은 약속카드 탭 배지)
+ * - 방장 취소(11/6 결정 5번): 방장도 약속에서 빠지고 방을 나간다. 가장 먼저 들어온 사람이 새 방장(host_changed 알림), 약속은 남은 사람끼리 유지
  * - TODO(C): 30분 전 알림은 서버 예약 작업 (푸시 방식은 담당자 결정)
  */
 import * as mock from '@/api/mock/appointments';
@@ -51,7 +51,7 @@ export async function getMyAppointments(): Promise<MyAppointments> {
   return data as MyAppointments;
 }
 
-/** S15 '약속 취소' (확인 팝업 후). 방장이면 약속 전체 취소 */
+/** S15 '약속 취소' (확인 팝업 후). 방장도 빠지고 다음 사람이 방장 (11/6 결정 5번) */
 export async function cancelAppointment(appointmentId: string): Promise<void> {
   if (USE_MOCK_API) return mock.cancelAppointment(appointmentId);
   const { error } = await sb().rpc('cancel_appointment', { p_appointment_id: appointmentId });

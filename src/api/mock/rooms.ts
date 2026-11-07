@@ -88,7 +88,7 @@ export async function getMyRooms(category?: Category): Promise<RoomListItem[]> {
         members: memberIds.map(toMini),
         member_count: memberIds.length,
         last_message: last
-          ? { sender_nickname: last.sender_id ? findUser(last.sender_id).nickname : null, body: last.type === 'game_result' ? '게임 결과를 공유했어요' : last.body, created_at: last.created_at }
+          ? { sender_nickname: last.sender_id ? findUser(last.sender_id).nickname : null, sender_deleted: last.sender_deleted, body: last.type === 'game_result' ? '게임 결과를 공유했어요' : last.body, created_at: last.created_at }
           : null,
         unread_count: messages.slice(lastReadIndex + 1).filter((m) => m.sender_id !== meId).length,
         is_host: isHost,
@@ -156,9 +156,58 @@ export async function openDirectRoom(userId: string): Promise<string> {
 export async function leaveRoom(roomId: string): Promise<void> {
   await delay();
   const meId = requireMeId();
-  const room = findRoom(roomId);
-  if (room.kind === 'post' && room.host_id === meId) throw new ApiError('방장은 나갈 수 없어요. 게시물을 삭제해 주세요', 'not_allowed');
+  findRoom(roomId);
   requireMember(roomId, meId);
-  db.members = db.members.filter((m) => !(m.room_id === roomId && m.user_id === meId));
-  addSystemMessage(roomId, `${findUser(meId).nickname}님이 나갔어요`);
+  leaveRoomAs(roomId, meId);
+}
+
+/**
+ * 가짜 leave_room_internal (C의 *_feedback_1106.sql과 같은 규칙, 11/6 결정 5번)
+ * 시작 전 약속 참여 취소 → 방에서 빠짐 → 방장이었으면 가장 먼저 들어온 사람이 방장·글 작성자, 아무도 없으면 글 closed
+ */
+export function leaveRoomAs(roomId: string, userId: string) {
+  const room = findRoom(roomId);
+  const nickname = findUser(userId).nickname;
+  db.members = db.members.filter((m) => !(m.room_id === roomId && m.user_id === userId));
+  if (room.kind === 'direct') {
+    addSystemMessage(roomId, `${nickname}님이 나갔어요`);
+    return;
+  }
+
+  const appointment = db.appointments.find(
+    (a) =>
+      a.room_id === roomId &&
+      a.status === 'confirmed' &&
+      new Date(a.start_at).getTime() > Date.now() &&
+      db.appointmentMembers.some((m) => m.appointment_id === a.id && m.user_id === userId && !m.canceled_at),
+  );
+  if (appointment) {
+    const member = db.appointmentMembers.find((m) => m.appointment_id === appointment.id && m.user_id === userId);
+    if (member) member.canceled_at = nowIso();
+    if (!db.appointmentMembers.some((m) => m.appointment_id === appointment.id && !m.canceled_at)) appointment.status = 'canceled';
+  }
+  const left = appointment ? `${nickname}님이 약속을 취소하고 ` : `${nickname}님이 `;
+
+  if (room.host_id !== userId) {
+    addSystemMessage(roomId, `${left}나갔어요`);
+    return;
+  }
+  const next = db.members
+    .filter((m) => m.room_id === roomId)
+    .sort((a, b) => a.joined_at.localeCompare(b.joined_at) || a.user_id.localeCompare(b.user_id))[0];
+  const post = db.posts.find((p) => p.id === room.post_id);
+  if (!next) {
+    if (post && (post.status === 'open' || post.status === 'confirmed')) post.status = 'closed';
+    db.appointments.forEach((a) => {
+      if (a.room_id === roomId && a.status === 'confirmed' && new Date(a.start_at).getTime() > Date.now()) a.status = 'canceled';
+    });
+    db.joinRequests.forEach((j) => {
+      if (j.room_id === roomId && j.status === 'pending') Object.assign(j, { status: 'rejected', decided_at: nowIso() });
+    });
+    addSystemMessage(roomId, `${left}나갔어요`);
+    return;
+  }
+  room.host_id = next.user_id;
+  if (post) post.author_id = next.user_id;
+  addSystemMessage(roomId, `${left}나가서 ${findUser(next.user_id).nickname}님이 새 방장이 됐어요`);
 }
