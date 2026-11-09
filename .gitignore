@@ -44,3 +44,6 @@ example
 
 # 비밀 키가 들어가는 파일 (절대 GitHub에 올리지 않기)
 .env
+
+# 약관·처리방침 미리 보기 (npm run legal)
+_site/

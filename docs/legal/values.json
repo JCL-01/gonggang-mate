@@ -1,0 +1,9 @@
+{
+  "_설명": "약관·처리방침·계정 삭제 안내에 들어가는 값. 비어 있는 값이 있으면 npm run legal과 자동 배포가 멈춘다. 자세한 건 docs/legal/README.md",
+  "CONTACT_EMAIL": "",
+  "PRIVACY_OFFICER": "",
+  "EFFECTIVE_DATE": "2026년 11월 10일",
+  "REPORT_RETENTION": "1년",
+  "DELETION_DAYS": "7일",
+  "SITE_URL": "https://jcl-01.github.io/gonggang-mate"
+}

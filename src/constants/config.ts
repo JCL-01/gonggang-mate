@@ -53,6 +53,6 @@ export const ACTIVE_PING_MINUTES = 5; // 앱이 켜져 있는 동안 이 간격�
 // 신고: 10/31 회의에서 뺐다가 플레이스토어 정책(사용자 생성 콘텐츠) 때문에 다시 넣었다 (11/6 결정 8번). 차단도 그대로.
 
 // ── 약관·처리방침 공개 주소 (11/6 결정 9번) ──
-// 노션 등에 docs/legal/*.md를 올린 뒤 주소를 넣는다. 비어 있으면 앱에서 '준비 중' 안내가 뜬다
-export const PRIVACY_POLICY_URL = '';
-export const TERMS_URL = '';
+// docs/legal/*.md를 GitHub Pages로 공개한 주소 (docs/legal/README.md). 비우면 앱에서 '준비 중' 안내가 뜬다
+export const PRIVACY_POLICY_URL = 'https://jcl-01.github.io/gonggang-mate/privacy.html';
+export const TERMS_URL = 'https://jcl-01.github.io/gonggang-mate/terms.html';
