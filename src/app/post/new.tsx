@@ -3,7 +3,7 @@
  * PRD: 제목(최대 30자), 약속시간(TimeGrid mode="single-range"), 내용(최대 500자), 사진(최대 5장).
  * '게시' 시 게시물과 채팅방이 함께 생성되고 작성자가 방장이 된다. 게시 후 S07로 돌아간다.
  * 10/31 회의: 매주 반복 없이 1회성 (가장 가까운 해당 요일). 하단에 실제 날짜를 보여 준다.
- * 격자의 옅은 칸 = 내 공강 (highlight). 사진 첨부는 P2 (api/posts.ts TODO), 지금은 없다.
+ * 격자의 옅은 칸 = 내 공강 (highlight). 사진 첨부는 P2로 미뤘다.
  * 디자인은 나중에 피그마 반영 예정 (지금은 기능 위주).
  */
 import { router, useLocalSearchParams, usePreventRemove } from 'expo-router';

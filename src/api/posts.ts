@@ -4,7 +4,7 @@
  * - 매칭 목록은 서버(get_matching_posts RPC)가 lib/visibility.ts isPostVisibleTo와 같은 규칙으로 거른다 (차단 포함)
  * - 게시물 작성은 게시물 + 채팅방 + 방장 참여를 한 번에(create_post RPC)
  *
- * TODO(C): 사진 첨부(photo_uris)는 Storage 업로드 후 post_photos에 저장 (P2)
+ * 게시물 사진 첨부(photo_uris, post_photos 테이블)는 P2로 미뤘다 — 아직 화면에서 쓰지 않는다
  */
 import * as mock from '@/api/mock/posts';
 import { sb, toApiError, USE_MOCK_API } from '@/api/supabaseHelpers';
