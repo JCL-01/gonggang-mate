@@ -1,0 +1,43 @@
+# 약관·처리방침·계정 삭제 안내를 GitHub Pages로 공개한다 (docs/legal/README.md)
+# 처음 한 번: 저장소 Settings → Pages → Source를 "GitHub Actions"로 바꿔야 한다
+name: Legal pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/legal/**'
+      - 'scripts/build-legal.mjs'
+      - '.github/workflows/legal-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: legal-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: 문서 만들기 (values.json에 빈 값이 있으면 여기서 멈춘다)
+        run: npm run legal
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

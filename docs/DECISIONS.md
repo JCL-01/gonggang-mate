@@ -101,4 +101,4 @@ PRD와 다르게 정한 것, PRD의 `[결정 필요]` 항목을 정한 결과를
 
 - C 작업(#32) 반영 후 확인: **탈퇴한 사람이 먼저 연 1:1 채팅방과 아무도 남지 않은 채팅방은 탈퇴 시 그 안의 메시지·약속·후기와 함께 지워진다.** 고치지 않고 그대로 두며, 개인정보처리방침·계정 삭제 안내에 적었다.
 - 프로필 사진은 카메라·마이크 권한을 쓰지 않는다 (`app.json` expo-image-picker `cameraPermission: false`, `microphonePermission: false`). 안드로이드는 시스템 사진 선택창이라 사진 권한도 묻지 않는다.
-- 이용약관·개인정보처리방침 주소는 `config.ts`의 `TERMS_URL`, `PRIVACY_POLICY_URL`. 공개 페이지를 올린 뒤 채운다 (비어 있으면 '준비 중' 안내).
+- 이용약관·개인정보처리방침·계정 삭제 안내는 `docs/legal/`에서 **GitHub Pages로 자동 공개**한다 (`docs/legal/README.md`). 주소는 `config.ts`의 `TERMS_URL`, `PRIVACY_POLICY_URL`. 운영팀 이메일·보호책임자 등은 `docs/legal/values.json`, 비어 있으면 공개되지 않는다.
