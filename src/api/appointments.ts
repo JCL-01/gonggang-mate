@@ -6,7 +6,7 @@
  *         대기 중인 채팅 요청은 자동 거절
  * - 참여자 취소: 약속에서 빠지고 채팅방에서 나감. 시작 전까지만
  * - 방장 취소(11/6 결정 5번): 방장도 약속에서 빠지고 방을 나간다. 가장 먼저 들어온 사람이 새 방장(host_changed 알림), 약속은 남은 사람끼리 유지
- * - TODO(C): 30분 전 알림은 서버 예약 작업 (푸시 방식은 담당자 결정)
+ * - 만남 30분 전 알림은 P2로 미뤘다 (푸시 알림 도입 때 서버 예약 작업으로)
  */
 import * as mock from '@/api/mock/appointments';
 import { requireAuthUser, sb, toApiError, USE_MOCK_API } from '@/api/supabaseHelpers';

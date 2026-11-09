@@ -8,7 +8,7 @@
  * 가입 도중에 그만둔 사람(비밀번호를 안 정함)은 getSession에서 로그아웃시킨다.
  *
  * Supabase 대시보드 설정이 필요하다: Magic Link 메일 템플릿에 {{ .Token }}, 외부 메일(SMTP) 연결
- * TODO(C): 5회 실패 시 잠금은 Supabase 기본 요청 제한(IP 기준)으로 대신하고 있음
+ * 로그인 실패 잠금(PRD 12장)은 따로 만들지 않고 Supabase Auth 기본 요청 제한(IP 기준)으로 대신한다
  */
 import * as mock from '@/api/mock/auth';
 import { getMe } from '@/api/users';
