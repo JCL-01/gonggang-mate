@@ -90,9 +90,9 @@ docs/
 
 | 역할 | 담당 | 주요 작업 |
 |---|---|---|
-| A · 프론트엔드·디자인, 저장소 관리 | [@JCL-01](https://github.com/JCL-01) | 앱 구조·api 계층 설계, 인증·홈·시간표·혼자놀기·약속·후기 화면, 전체 디자인 반영, 실사용 피드백 반영 |
-| B · 프론트엔드 | [@shinjeonghun10](https://github.com/shinjeonghun10) | 게시판·글쓰기·채팅 목록·채팅방 화면 |
-| C · 서버·DB | [@1502sally-spec](https://github.com/1502sally-spec) | Supabase 설계, 마이그레이션·RLS·RPC, 실시간 채팅, 게임·약속·후기 서버 로직, 탈퇴 Edge Function |
+| 이주찬 · 프론트엔드·디자인, 저장소 관리 | [@JCL-01](https://github.com/JCL-01) | 앱 구조·api 계층 설계, 인증·홈·시간표·혼자놀기·약속·후기 화면, 전체 디자인 반영, 실사용 피드백 반영 |
+| 신정훈 · 프론트엔드 | [@shinjeonghun10](https://github.com/shinjeonghun10) | 게시판·글쓰기·채팅 목록·채팅방 화면 |
+| 유연서 · 서버·DB | [@1502sally-spec](https://github.com/1502sally-spec) | Supabase 설계, 마이그레이션·RLS·RPC, 실시간 채팅, 게임·약속·후기 서버 로직, 탈퇴 Edge Function |
 
 - 협업: Fork → Pull Request, CI 통과 후 리뷰·머지 ([CONTRIBUTING.md](CONTRIBUTING.md))
 - AI 도구(Claude Code)를 설계 검토, 코드 작성, SQL 검증에 함께 사용했습니다. 커밋 작성자 `Claude`는 이 도구로 만든 커밋입니다.
