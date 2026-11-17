@@ -1,12 +1,13 @@
 # 약관·처리방침·계정 삭제 안내 (공개 페이지)
 
-이 폴더의 문서 3개는 **GitHub Pages로 공개**된다. master에 이 폴더가 바뀌어 올라가면 `.github/workflows/legal-pages.yml`이 HTML로 바꿔 자동 배포한다.
+이 폴더의 문서 4개는 **GitHub Pages로 공개**된다. master에 이 폴더가 바뀌어 올라가면 `.github/workflows/legal-pages.yml`이 HTML로 바꿔 자동 배포한다.
 
 | 문서 | 공개 주소 | 쓰는 곳 |
 |---|---|---|
 | `privacy-policy.md` | https://jcl-01.github.io/gonggang-mate/privacy.html | 앱 설정·가입 화면 (`config.ts` `PRIVACY_POLICY_URL`), Play Console 개인정보처리방침 |
 | `terms.md` | https://jcl-01.github.io/gonggang-mate/terms.html | 앱 설정·가입 화면 (`config.ts` `TERMS_URL`) |
 | `account-deletion.md` | https://jcl-01.github.io/gonggang-mate/account-deletion.html | Play Console 데이터 보안 → 계정 삭제 URL |
+| `child-safety.md` | https://jcl-01.github.io/gonggang-mate/child-safety.html | Play Console 앱 콘텐츠 → 아동 안전 표준 (소셜 카테고리 필수) |
 
 ## 값 채우기
 문서 안의 `{{이름}}`은 `values.json`의 값으로 바뀐다. **값이 하나라도 비어 있으면 빌드가 실패해서 공개되지 않는다.**
