@@ -1,6 +1,6 @@
 {
   "_설명": "약관·처리방침·계정 삭제 안내에 들어가는 값. 비어 있는 값이 있으면 npm run legal과 자동 배포가 멈춘다. 자세한 건 docs/legal/README.md",
-  "CONTACT_EMAIL": "gonggangmate@gmail.com",
+  "CONTACT_EMAIL": "sin86195889@gmail.com",
   "PRIVACY_OFFICER": "공강메이트 운영팀 대표",
   "EFFECTIVE_DATE": "2026년 11월 10일",
   "REPORT_RETENTION": "1년",

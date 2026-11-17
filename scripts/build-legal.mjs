@@ -17,6 +17,7 @@ const PAGES = [
   { md: 'privacy-policy.md', html: 'privacy.html' },
   { md: 'terms.md', html: 'terms.html' },
   { md: 'account-deletion.md', html: 'account-deletion.html' },
+  { md: 'child-safety.md', html: 'child-safety.html' },
 ];
 
 const raw = JSON.parse(readFileSync(join(src, 'values.json'), 'utf8'));
